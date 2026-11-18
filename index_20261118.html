@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>기사 프로젝트 노트</title>
+<style>
+  :root{
+    --bg:#f6f4ee; --card:#ffffff; --ink:#1f2937; --sub:#6b7280;
+    --line:#e7e3d8; --accent:#2f6fed; --accent-soft:#e8f0ff; --ok:#16a34a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+    line-height:1.6;-webkit-text-size-adjust:100%}
+  .wrap{max-width:720px;margin:0 auto;padding:28px 16px 64px}
+  header{margin-bottom:20px}
+  .tag{display:inline-block;font-size:13px;font-weight:600;color:var(--accent);
+    background:var(--accent-soft);padding:4px 12px;border-radius:999px}
+  h1{font-size:26px;margin:12px 0 0;letter-spacing:-.02em}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:18px 18px 16px;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  .label{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.04em;margin-bottom:8px}
+  .edit{outline:none;border-radius:8px;padding:2px 4px;margin:-2px -4px}
+  .edit:focus{background:var(--accent-soft)}
+  .edit:empty::before{content:attr(data-ph);color:#b4b9c2}
+  .big{font-size:20px;font-weight:700;line-height:1.45}
+  ul{list-style:none;margin:0;padding:0}
+  .todo{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+  .todo:first-child{border-top:0}
+  .todo input{appearance:none;-webkit-appearance:none;flex:none;width:24px;height:24px;margin:2px 0 0;
+    border:2px solid #c9ccd3;border-radius:8px;background:#fff;cursor:pointer;position:relative}
+  .todo input:checked{background:var(--ok);border-color:var(--ok)}
+  .todo input:checked::after{content:"";position:absolute;left:7px;top:2px;width:6px;height:12px;
+    border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+  .todo .edit{flex:1;min-width:0;font-size:16px;word-break:break-word}
+  .todo input:checked + .edit{color:var(--sub);text-decoration:line-through}
+  #logs{position:relative;padding-left:22px}
+  #logs::before{content:"";position:absolute;left:6px;top:10px;bottom:10px;width:2px;background:var(--line)}
+  .log{position:relative;padding:0 0 18px}
+  .log:last-child{padding-bottom:4px}
+  .log::before{content:"";position:absolute;left:-22px;top:5px;width:14px;height:14px;border-radius:50%;
+    background:var(--accent);border:3px solid var(--card);box-shadow:0 0 0 2px var(--accent-soft)}
+  .date{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:2px}
+  .log .edit{display:block;font-size:16px;word-break:break-word}
+  .news{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px 16px;
+    margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,.03);overflow:hidden}
+  .news-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .news-top b{font-size:12px;letter-spacing:.12em;color:var(--sub)}
+  .live{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#e5484d}
+  .live i{width:8px;height:8px;border-radius:50%;background:#e5484d;animation:blink 1.2s infinite}
+  .news-body{display:flex;gap:14px}
+  .pic{flex:none;width:34%;aspect-ratio:4/3;border-radius:12px;background:var(--soft,var(--accent-soft));position:relative;overflow:hidden;transition:background .4s}
+  .pic::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.75) 50%,transparent 70%);
+    transform:translateX(-100%);animation:shine 2.6s infinite}
+  .pic svg{position:absolute;left:8%;top:8%;width:84%;height:84%}
+  .pic .d{stroke:var(--c,var(--accent));stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;
+    stroke-dasharray:100;stroke-dashoffset:100;animation:draw 3.6s ease-in-out infinite}
+  .lines{flex:1;min-width:0;display:flex;flex-direction:column;gap:9px;justify-content:center}
+  .ln{height:9px;border-radius:5px;background:#e3e0d5;transform-origin:left;transform:scaleX(0);
+    animation:grow 3.6s ease-in-out infinite}
+  .ln.h{height:14px;background:#2b3442}
+  .ln:nth-child(2){animation-delay:.25s}.ln:nth-child(3){animation-delay:.5s}
+  .ln:nth-child(4){animation-delay:.75s}.ln:nth-child(5){animation-delay:1s}
+  @keyframes grow{0%{transform:scaleX(0)}30%,85%{transform:scaleX(var(--w,1))}100%{transform:scaleX(0)}}
+  @keyframes draw{0%{stroke-dashoffset:100}45%,85%{stroke-dashoffset:0}100%{stroke-dashoffset:100}}
+  @keyframes shine{0%{transform:translateX(-100%)}60%,100%{transform:translateX(100%)}}
+  @keyframes blink{50%{opacity:.25}}
+  @media (prefers-reduced-motion:reduce){
+    .ln{animation:none;transform:scaleX(var(--w,1))}.pic::after,.live i{animation:none}
+    .pic .d{animation:none;stroke-dashoffset:0}
+  }
+  button{font:inherit;font-size:14px;font-weight:600;color:var(--accent);background:var(--accent-soft);
+    border:0;border-radius:12px;padding:10px 14px;margin-top:8px;cursor:pointer}
+  button:active{opacity:.7}
+  .hint{font-size:12px;color:var(--sub);text-align:center;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="tag">기사 프로젝트 노트</span>
+    <h1 class="edit" id="title" data-ph="제목">프로젝트 노트</h1>
+  </header>
+
+  <section class="news" aria-hidden="true">
+    <div class="news-top"><b id="newsLabel">NEWS</b><span class="live"><i></i>작성 중</span></div>
+    <div class="news-body">
+      <div class="pic"><svg id="pic" viewBox="0 0 100 50"></svg></div>
+      <div class="lines">
+        <div class="ln h" style="--w:.85"></div>
+        <div class="ln" style="--w:1"></div>
+        <div class="ln" style="--w:.92"></div>
+        <div class="ln" style="--w:1"></div>
+        <div class="ln" style="--w:.55"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="label">프로젝트 한 줄</div>
+    <div class="edit big" data-k="brief" data-ph="프로젝트를 한 줄로 적어 주세요">브리프 한 줄</div>
+  </section>
+
+  <section class="card">
+    <div class="label">대주제</div>
+    <div class="edit big" data-k="topic" data-ph="주제">경제</div>
+  </section>
+
+  <section class="card">
+    <div class="label">할 일 체크리스트</div>
+    <ul id="todos"></ul>
+  </section>
+
+  <section class="card">
+    <div class="label">날짜별 기록</div>
+    <div id="logs"></div>
+    <button id="addLog" type="button">+ 다음 날 추가</button>
+  </section>
+
+  <p class="hint">글자를 누르면 바로 수정돼요 · 이 기기 브라우저에 자동 저장</p>
+</div>
+
+<script>
+(function(){
+  var KEY="article-project-note-v1", S={};
+  try{ S=JSON.parse(localStorage.getItem(KEY)||"{}"); }catch(e){ S={}; }
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+
+  // 단일 칸
+  document.querySelectorAll("[data-k]").forEach(function(el){
+    var k=el.dataset.k;
+    if(S[k]!==undefined) el.textContent=S[k];
+    el.contentEditable="true";
+    el.addEventListener("input",function(){ S[k]=el.textContent; save(); });
+  });
+  var title=document.getElementById("title");
+  if(S.title!==undefined) title.textContent=S.title;
+  title.contentEditable="true";
+  title.addEventListener("input",function(){ S.title=title.textContent; save(); });
+
+  // 체크리스트 5개
+  if(!S.todos) S.todos=[1,2,3,4,5].map(function(){return {t:"",d:false};});
+  var ul=document.getElementById("todos");
+  S.todos.forEach(function(it,i){
+    var li=document.createElement("li"); li.className="todo";
+    var cb=document.createElement("input"); cb.type="checkbox"; cb.checked=it.d;
+    var tx=document.createElement("div"); tx.className="edit"; tx.contentEditable="true";
+    tx.dataset.ph="할 일 "+(i+1); tx.textContent=it.t;
+    cb.addEventListener("change",function(){ it.d=cb.checked; save(); });
+    tx.addEventListener("input",function(){ it.t=tx.textContent; save(); });
+    li.appendChild(cb); li.appendChild(tx); ul.appendChild(li);
+  });
+
+  // 날짜별 기록 (11/18부터)
+  if(!S.logs) S.logs=[{d:"11/18",t:""}];
+  var box=document.getElementById("logs");
+  function addRow(it){
+    var row=document.createElement("div"); row.className="log";
+    var d=document.createElement("div"); d.className="date"; d.textContent=it.d;
+    var tx=document.createElement("div"); tx.className="edit"; tx.contentEditable="true";
+    tx.dataset.ph="오늘 한 줄"; tx.textContent=it.t;
+    tx.addEventListener("input",function(){ it.t=tx.textContent; save(); });
+    row.appendChild(d); row.appendChild(tx); box.appendChild(row);
+  }
+  S.logs.forEach(addRow);
+  document.getElementById("addLog").addEventListener("click",function(){
+    var last=S.logs[S.logs.length-1].d.split("/");
+    var dt=new Date(2026,parseInt(last[0],10)-1,parseInt(last[1],10)+1);
+    var it={d:(dt.getMonth()+1)+"/"+dt.getDate(),t:""};
+    S.logs.push(it); save(); addRow(it);
+  });
+  // 대주제에 맞는 애니메이션
+  var P='class="d" pathLength="100"';
+  var T=[
+   {k:["경제","금융","증시","주식","물가","금리","부동산","재테크","산업"],c:"#2f6fed",s:"#e8f0ff",
+    g:'<polyline '+P+' points="2,44 25,30 45,36 70,14 98,6"/><polyline '+P+' points="84,6 98,6 98,20"/>'},
+   {k:["정치","국회","선거","정부","대통령"],c:"#7c5cff",s:"#efeaff",
+    g:'<path '+P+' d="M10 44H90M16 44V22M38 44V22M62 44V22M84 44V22M10 22L50 4L90 22Z"/>'},
+   {k:["국제","세계","외교","해외","북한"],c:"#0ea5e9",s:"#e0f4fd",
+    g:'<circle '+P+' cx="50" cy="25" r="21"/><ellipse '+P+' cx="50" cy="25" rx="9" ry="21"/><path '+P+' d="M29 25H71"/>'},
+   {k:["사회","사건","노동","교육","복지"],c:"#0f9d8a",s:"#e0f5f1",
+    g:'<circle '+P+' cx="30" cy="16" r="8"/><path '+P+' d="M16 44Q30 24 44 44"/><circle '+P+' cx="70" cy="16" r="8"/><path '+P+' d="M56 44Q70 24 84 44"/>'},
+   {k:["과학","기술","it","ai","인공지능","반도체","테크"],c:"#6366f1",s:"#eceeff",
+    g:'<rect '+P+' x="30" y="10" width="40" height="30" rx="4"/><path '+P+' d="M40 10V3M50 10V3M60 10V3M40 40V47M50 40V47M60 40V47M30 18H23M30 32H23M70 18H77M70 32H77"/>'},
+   {k:["스포츠","축구","야구","농구","올림픽"],c:"#f97316",s:"#fff0e3",
+    g:'<circle '+P+' cx="50" cy="25" r="21"/><path '+P+' d="M32 9Q50 25 32 41M68 9Q50 25 68 41"/>'},
+   {k:["문화","연예","예술","영화","음악","방송"],c:"#e11d8d",s:"#fde8f4",
+    g:'<path '+P+' d="M40 38V10L70 5V33"/><circle '+P+' cx="34" cy="38" r="6"/><circle '+P+' cx="64" cy="33" r="6"/>'},
+   {k:["환경","기후","에너지"],c:"#16a34a",s:"#e3f6e8",
+    g:'<path '+P+' d="M20 40Q20 8 80 8Q80 40 20 40ZM20 40L60 18"/>'},
+   {k:["건강","의료","보건","의학"],c:"#e5484d",s:"#fdeaea",
+    g:'<polyline '+P+' points="2,28 28,28 36,28 42,10 52,44 60,22 66,28 98,28"/>'}
+  ];
+  var DEF={c:"#6b7280",s:"#eceae3",g:'<path '+P+' d="M2 30Q14 8 26 30T50 30T74 30T98 30"/>'};
+  var topicEl=document.querySelector('[data-k="topic"]');
+  var picEl=document.getElementById("pic"), lab=document.getElementById("newsLabel"), cur=null;
+  function theme(){
+    var v=(topicEl.textContent||"").trim(), low=v.toLowerCase(), t=DEF;
+    for(var i=0;i<T.length;i++){
+      if(T[i].k.some(function(w){return low.indexOf(w)>-1;})){t=T[i];break;}
+    }
+    lab.textContent=v?("NEWS · "+v):"NEWS";
+    if(t!==cur){
+      cur=t;
+      picEl.innerHTML=t.g;
+      var pic=picEl.parentNode;
+      pic.style.setProperty("--c",t.c); pic.style.setProperty("--soft",t.s);
+    }
+  }
+  theme();
+  topicEl.addEventListener("input",theme);
+})();
+</script>
+</body>
+</html>
